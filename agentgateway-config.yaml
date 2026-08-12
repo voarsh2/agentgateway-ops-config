@@ -1,0 +1,421 @@
+config:
+  adminAddr: 0.0.0.0:15000
+frontendPolicies:
+  http:
+    maxBufferSize: 350388608
+llm:
+  port: 3000
+  models:
+    - name: clawbay-gpt-5.4
+      provider: openAI
+      params:
+        model: gpt-5.4
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 4
+          duration: 1m
+          restoreHealth: 1
+    - name: aicheap-gpt-5.4
+      provider: openAI
+      params:
+        model: gpt-5.4
+        apiKey: $AICHEAP_API_KEY
+        baseUrl: https://api.aicheap.io/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 3
+          duration: 5m
+          restoreHealth: 1
+    - name: clawbay-gpt-5.4-mini
+      provider: openAI
+      params:
+        model: gpt-5.4-mini
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
+      backendTLS: {}
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 1
+          duration: 10m
+          restoreHealth: 1
+    - name: aicheap-gpt-5.4-mini
+      provider: openAI
+      params:
+        model: gpt-5.4-mini
+        apiKey: $AICHEAP_API_KEY
+        baseUrl: https://api.aicheap.io/v1
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 3
+          duration: 10m
+          restoreHealth: 1
+    - name: clawbay-gpt-5.5
+      provider: openAI
+      params:
+        model: gpt-5.5
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 3
+          duration: 1m
+          restoreHealth: 1
+    - name: aicheap-gpt-5.5
+      provider: openAI
+      params:
+        model: gpt-5.5
+        apiKey: $AICHEAP_API_KEY
+        baseUrl: https://api.aicheap.io/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 3
+          duration: 5m
+          restoreHealth: 1
+    - name: clawbay-gpt-5.6-sol
+      provider: openAI
+      params:
+        model: gpt-5.6-sol
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 3
+          duration: 1m
+          restoreHealth: 1
+    - name: aicheap-gpt-5.6-sol
+      provider: openAI
+      params:
+        model: gpt-5.6-sol
+        apiKey: $AICHEAP_API_KEY
+        baseUrl: https://api.aicheap.io/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 5
+          duration: 5m
+          restoreHealth: 1
+    - name: clawbay-gpt-5.6-luna
+      provider: openAI
+      params:
+        model: gpt-5.6-luna
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 3
+          duration: 1m
+          restoreHealth: 1
+    - name: aicheap-gpt-5.6-luna
+      provider: openAI
+      params:
+        model: gpt-5.6-luna
+        apiKey: $AICHEAP_API_KEY
+        baseUrl: https://api.aicheap.io/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 5
+          duration: 5m
+          restoreHealth: 1
+    - name: clawbay-gpt-5.6-terra
+      provider: openAI
+      params:
+        model: gpt-5.6-terra
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 3
+          duration: 1m
+          restoreHealth: 1
+    - name: aicheap-gpt-5.6-terra
+      provider: openAI
+      params:
+        model: gpt-5.6-terra
+        apiKey: $AICHEAP_API_KEY
+        baseUrl: https://api.aicheap.io/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        eviction:
+          consecutiveFailures: 5
+          duration: 5m
+          restoreHealth: 1
+  virtualModels:
+    - name: gpt-5.4
+      routing:
+        failover:
+          targets:
+            - model: aicheap-gpt-5.4
+              priority: 0
+            - model: clawbay-gpt-5.4
+              priority: 1
+    - name: gpt-5.4-mini
+      routing:
+        failover:
+          targets:
+            - model: clawbay-gpt-5.4-mini
+              priority: 0
+            - model: aicheap-gpt-5.4-mini
+              priority: 1
+    - name: gpt-5.5
+      routing:
+        failover:
+          targets:
+            - model: aicheap-gpt-5.5
+              priority: 0
+            - model: clawbay-gpt-5.5
+              priority: 1
+    - name: gpt-5.6-sol
+      routing:
+        failover:
+          targets:
+            - model: aicheap-gpt-5.6-sol
+              priority: 0
+            - model: clawbay-gpt-5.6-sol
+              priority: 1
+    - name: gpt-5.6-luna
+      routing:
+        failover:
+          targets:
+            - model: aicheap-gpt-5.6-luna
+              priority: 0
+            - model: clawbay-gpt-5.6-luna
+              priority: 1
+    - name: gpt-5.6-terra
+      routing:
+        failover:
+          targets:
+            - model: aicheap-gpt-5.6-terra
+              priority: 0
+            - model: clawbay-gpt-5.6-terra
+              priority: 1
+    - name: hindsight-facts
+      routing:
+        failover:
+          targets:
+            - model: clawbay-gpt-5.4-mini
+              priority: 0
+            - model: aicheap-gpt-5.4-mini
+              priority: 1
+  providers: []
