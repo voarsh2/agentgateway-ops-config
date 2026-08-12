@@ -5,6 +5,33 @@ frontendPolicies:
     maxBufferSize: 350388608
 llm:
   port: 3000
+  providers:
+    - name: aicheap-shared
+      provider: openAI
+      params:
+        apiKey: $AICHEAP_API_KEY
+        baseUrl: https://api.aicheap.io/v1
+      defaults:
+        transformation:
+          input: >-
+            type(llmRequest.input) == list
+              ? llmRequest.input
+                  .map(item,
+                    (has(item.type) && has(item.id) && item.type == "function_call" && item.id.startsWith("call_t2_"))
+                      ? item.merge({"id": "fc_" + item.id.stripPrefix("call_t2_").substring(0, 61)})
+                      : item
+                  )
+                  .map(item,
+                    (has(item.type) && has(item.id) && item.type == "custom_tool_call" && item.id.startsWith("call_t2_"))
+                      ? item.merge({"id": "ctc_" + item.id.stripPrefix("call_t2_").substring(0, 60)})
+                      : item
+                  )
+                  .map(item,
+                    (has(item.type) && has(item.id) && item.type == "web_search_call" && item.id.startsWith("call_t2_"))
+                      ? item.merge({"id": "ws_" + item.id.stripPrefix("call_t2_").substring(0, 61)})
+                      : item
+                  )
+              : llmRequest.input
   models:
     - name: clawbay-gpt-5.4
       provider: openAI
@@ -40,11 +67,10 @@ llm:
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.4
-      provider: openAI
+      provider:
+        reference: aicheap-shared
       params:
         model: gpt-5.4
-        apiKey: $AICHEAP_API_KEY
-        baseUrl: https://api.aicheap.io/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -86,11 +112,10 @@ llm:
           duration: 10m
           restoreHealth: 1
     - name: aicheap-gpt-5.4-mini
-      provider: openAI
+      provider:
+        reference: aicheap-shared
       params:
         model: gpt-5.4-mini
-        apiKey: $AICHEAP_API_KEY
-        baseUrl: https://api.aicheap.io/v1
       health:
         unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
         eviction:
@@ -131,11 +156,10 @@ llm:
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.5
-      provider: openAI
+      provider:
+        reference: aicheap-shared
       params:
         model: gpt-5.5
-        apiKey: $AICHEAP_API_KEY
-        baseUrl: https://api.aicheap.io/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -197,11 +221,10 @@ llm:
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.6-sol
-      provider: openAI
+      provider:
+        reference: aicheap-shared
       params:
         model: gpt-5.6-sol
-        apiKey: $AICHEAP_API_KEY
-        baseUrl: https://api.aicheap.io/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -263,11 +286,10 @@ llm:
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.6-luna
-      provider: openAI
+      provider:
+        reference: aicheap-shared
       params:
         model: gpt-5.6-luna
-        apiKey: $AICHEAP_API_KEY
-        baseUrl: https://api.aicheap.io/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -329,11 +351,10 @@ llm:
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.6-terra
-      provider: openAI
+      provider:
+        reference: aicheap-shared
       params:
         model: gpt-5.6-terra
-        apiKey: $AICHEAP_API_KEY
-        baseUrl: https://api.aicheap.io/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -418,4 +439,3 @@ llm:
               priority: 0
             - model: aicheap-gpt-5.4-mini
               priority: 1
-  providers: []
