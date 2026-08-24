@@ -18,17 +18,17 @@ llm:
               ? llmRequest.input
                   .map(item,
                     (has(item.type) && has(item.id) && item.type == "function_call" && item.id.startsWith("call_t2_"))
-                      ? item.merge({"id": "fc_" + item.id.stripPrefix("call_t2_").substring(0, 61)})
+                      ? item.merge({"id": "fc_" + item.id.stripPrefix("call_t2_").replace("_", "").substring(0, 60)})
                       : item
                   )
                   .map(item,
                     (has(item.type) && has(item.id) && item.type == "custom_tool_call" && item.id.startsWith("call_t2_"))
-                      ? item.merge({"id": "ctc_" + item.id.stripPrefix("call_t2_").substring(0, 60)})
+                      ? item.merge({"id": "ctc_" + item.id.stripPrefix("call_t2_").replace("_", "").substring(0, 59)})
                       : item
                   )
                   .map(item,
                     (has(item.type) && has(item.id) && item.type == "web_search_call" && item.id.startsWith("call_t2_"))
-                      ? item.merge({"id": "ws_" + item.id.stripPrefix("call_t2_").substring(0, 61)})
+                      ? item.merge({"id": "ws_" + item.id.stripPrefix("call_t2_").replace("_", "").substring(0, 60)})
                       : item
                   )
               : llmRequest.input
@@ -95,7 +95,7 @@ llm:
       health:
         unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
         eviction:
-          consecutiveFailures: 3
+          consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
     - name: clawbay-gpt-5.4-mini
@@ -184,7 +184,7 @@ llm:
       health:
         unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
         eviction:
-          consecutiveFailures: 3
+          consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
     - name: clawbay-gpt-5.6-sol
@@ -249,7 +249,7 @@ llm:
       health:
         unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
         eviction:
-          consecutiveFailures: 5
+          consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
     - name: clawbay-gpt-5.6-luna
@@ -314,7 +314,7 @@ llm:
       health:
         unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
         eviction:
-          consecutiveFailures: 5
+          consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
     - name: clawbay-gpt-5.6-terra
@@ -379,7 +379,7 @@ llm:
       health:
         unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
         eviction:
-          consecutiveFailures: 5
+          consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
   virtualModels:
