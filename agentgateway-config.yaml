@@ -11,32 +11,6 @@ llm:
       params:
         apiKey: $AICHEAP_API_KEY
         baseUrl: https://api.aicheap.io/v1
-      defaults:
-        transformation:
-          input: >-
-            type(llmRequest.input) == list
-              ? llmRequest.input
-                  .map(item,
-                    (has(item.type) && has(item.id) && item.type == "function_call" && item.id.startsWith("call_t2_"))
-                      ? item.merge({"id": "fc_" + item.id.stripPrefix("call_t2_").replace("_", "").substring(0, 60)})
-                      : item
-                  )
-                  .map(item,
-                    (has(item.type) && has(item.id) && item.type == "custom_tool_call" && item.id.startsWith("call_t2_"))
-                      ? item.merge({"id": "ctc_" + item.id.stripPrefix("call_t2_").replace("_", "").substring(0, 59)})
-                      : item
-                  )
-                  .map(item,
-                    (has(item.type) && has(item.id) && item.type == "web_search_call" && item.id.startsWith("call_t2_"))
-                      ? item.merge({"id": "ws_" + item.id.stripPrefix("call_t2_").replace("_", "").substring(0, 60)})
-                      : item
-                  )
-                  .map(item,
-                    (has(item.call_id) && item.call_id.startsWith("call_t2_"))
-                      ? item.merge({"call_id": "call_" + item.call_id.stripPrefix("call_t2_").replace("_", "").substring(0, 58)})
-                      : item
-                  )
-              : llmRequest.input
   models:
     - name: clawbay-gpt-5.4
       provider: openAI
@@ -392,18 +366,16 @@ llm:
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.4
-              priority: 0
             - model: clawbay-gpt-5.4
+              priority: 0
+            - model: aicheap-gpt-5.4
               priority: 1
     - name: gpt-5.4-mini
       routing:
         failover:
           targets:
-            - model: clawbay-gpt-5.4-mini
-              priority: 0
             - model: aicheap-gpt-5.4-mini
-              priority: 1
+              priority: 0
     - name: gpt-5.5
       routing:
         failover:
@@ -440,7 +412,7 @@ llm:
       routing:
         failover:
           targets:
-            - model: clawbay-gpt-5.4-mini
+            - model: aicheap-gpt-5.4-mini
               priority: 0
             - model: aicheap-gpt-5.4-mini
               priority: 1
