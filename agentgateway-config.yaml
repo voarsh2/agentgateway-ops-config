@@ -31,6 +31,11 @@ llm:
                       ? item.merge({"id": "ws_" + item.id.stripPrefix("call_t2_").replace("_", "").substring(0, 60)})
                       : item
                   )
+                  .map(item,
+                    (has(item.call_id) && item.call_id.startsWith("call_t2_"))
+                      ? item.merge({"call_id": "call_" + item.call_id.stripPrefix("call_t2_").replace("_", "").substring(0, 58)})
+                      : item
+                  )
               : llmRequest.input
   models:
     - name: clawbay-gpt-5.4
