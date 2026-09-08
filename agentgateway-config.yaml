@@ -5,6 +5,17 @@ frontendPolicies:
     maxBufferSize: 350388608
 llm:
   port: 3000
+  policies:
+    retry:
+      attempts: 2
+      backoff: 1s
+      codes: [249, 402, 429]
+      condition: >-
+        response.code >= 500 || response.code == 249 ||
+        string(response.body).contains("model service not available") ||
+        string(response.body).contains("temporarily unavailable") ||
+        string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
+      maxBufferSize: 350388608
   providers:
     - name: aicheap-shared
       provider: openAI
@@ -40,9 +51,14 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
-          consecutiveFailures: 4
+          consecutiveFailures: 1
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.4
@@ -72,7 +88,12 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
           consecutiveFailures: 1
           duration: 5m
@@ -85,7 +106,12 @@ llm:
         baseUrl: https://api.theclawbay.com/v1
       backendTLS: {}
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
           consecutiveFailures: 1
           duration: 10m
@@ -96,9 +122,14 @@ llm:
       params:
         model: gpt-5.4-mini
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
-          consecutiveFailures: 3
+          consecutiveFailures: 1
           duration: 10m
           restoreHealth: 1
     - name: clawbay-gpt-5.5
@@ -129,9 +160,14 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
-          consecutiveFailures: 3
+          consecutiveFailures: 1
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.5
@@ -161,7 +197,12 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
           consecutiveFailures: 1
           duration: 5m
@@ -194,9 +235,14 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
-          consecutiveFailures: 3
+          consecutiveFailures: 1
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.6-sol
@@ -226,7 +272,12 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
           consecutiveFailures: 1
           duration: 5m
@@ -259,9 +310,14 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
-          consecutiveFailures: 3
+          consecutiveFailures: 1
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.6-luna
@@ -291,7 +347,12 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
           consecutiveFailures: 1
           duration: 5m
@@ -324,9 +385,14 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
-          consecutiveFailures: 3
+          consecutiveFailures: 1
           duration: 1m
           restoreHealth: 1
     - name: aicheap-gpt-5.6-terra
@@ -356,7 +422,12 @@ llm:
                 ] + llmRequest.instructions
               : llmRequest.instructions
       health:
-        unhealthyExpression: response.code == 402 || response.code == 429 || response.code >= 500
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 ||
+          response.code >= 500 ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers. Please try again shortly.")
         eviction:
           consecutiveFailures: 1
           duration: 5m
@@ -374,7 +445,7 @@ llm:
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.4-mini
+            - model: clawbay-gpt-5.4-mini
               priority: 0
     - name: gpt-5.5
       routing:
@@ -388,31 +459,31 @@ llm:
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.6-sol
-              priority: 0
             - model: clawbay-gpt-5.6-sol
+              priority: 0
+            - model: aicheap-gpt-5.6-sol
               priority: 1
     - name: gpt-5.6-luna
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.6-luna
-              priority: 0
             - model: clawbay-gpt-5.6-luna
+              priority: 0
+            - model: aicheap-gpt-5.6-luna
               priority: 1
     - name: gpt-5.6-terra
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.6-terra
-              priority: 0
             - model: clawbay-gpt-5.6-terra
+              priority: 0
+            - model: aicheap-gpt-5.6-terra
               priority: 1
     - name: hindsight-facts
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.4-mini
+            - model: clawbay-gpt-5.4-mini
               priority: 0
-            - model: aicheap-gpt-5.4-mini
+            - model: aicheap-gpt-5.6-luna
               priority: 1
