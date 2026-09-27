@@ -25,7 +25,68 @@ llm:
       params:
         apiKey: $AICHEAP_API_KEY
         baseUrl: https://api.aicheap.io/v1
+    - name: zai-shared
+      provider: openAI
+      params:
+        apiKey: $ZAI_API_KEY
+        baseUrl: https://api.z.ai/api/v1
+    - name: zai-chat-shared
+      provider: openAI
+      params:
+        apiKey: $ZAI_API_KEY
+        baseUrl: https://api.z.ai/api/coding/paas/v4
   models:
+    - name: zai-glm-5.3-flash
+      provider:
+        reference: zai-shared
+      params:
+        model: glm-5.3-flash
+      transformation:
+        reasoning: |-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort)
+            ? {"effort": llmRequest.reasoning.effort == "xhigh" ? "max" : llmRequest.reasoning.effort == "medium" ? "low" : llmRequest.reasoning.effort}
+            : {"effort": "max"}
+    - name: zai-glm-5.3
+      provider:
+        reference: zai-shared
+      params:
+        model: glm-5.3
+      transformation:
+        reasoning: |-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort)
+            ? {"effort": llmRequest.reasoning.effort == "xhigh" ? "max" : llmRequest.reasoning.effort == "medium" ? "low" : llmRequest.reasoning.effort}
+            : {"effort": "max"}
+    - name: zai-glm-5.2
+      provider:
+        reference: zai-shared
+      params:
+        model: glm-5.2
+      transformation:
+        reasoning: |-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort)
+            ? {"effort": llmRequest.reasoning.effort == "xhigh" ? "max" : llmRequest.reasoning.effort == "medium" ? "low" : llmRequest.reasoning.effort}
+            : {"effort": "max"}
+    - name: zai-chat-glm-5.3-flash
+      visibility: internal
+      provider:
+        reference: zai-chat-shared
+      params:
+        model: glm-5.3-flash
+    - name: clawbay-gpt-6-astra
+      provider: openAI
+      params:
+        model: gpt-6-astra
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+    - name: aicheap-gpt-6-astra
+      provider:
+        reference: aicheap-shared
+      params:
+        model: gpt-6-astra
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
     - name: clawbay-gpt-5.4
       provider: openAI
       params:
@@ -436,6 +497,32 @@ llm:
           duration: 5m
           restoreHealth: 1
   virtualModels:
+    - name: glm-5.3-flash
+      routing:
+        failover:
+          targets:
+            - model: zai-glm-5.3-flash
+              priority: 0
+    - name: glm-5.3
+      routing:
+        failover:
+          targets:
+            - model: zai-glm-5.3
+              priority: 0
+    - name: glm-5.2
+      routing:
+        failover:
+          targets:
+            - model: zai-glm-5.2
+              priority: 0
+    - name: gpt-6-astra
+      routing:
+        failover:
+          targets:
+            - model: clawbay-gpt-6-astra
+              priority: 0
+            - model: aicheap-gpt-6-astra
+              priority: 1
     - name: gpt-5.4
       routing:
         failover:
@@ -486,10 +573,12 @@ llm:
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.6-luna
+            - model: zai-chat-glm-5.3-flash
               priority: 0
             - model: aicheap-gpt-5.6-luna
               priority: 1
+            - model: clawbay-gpt-5.4-mini
+              priority: 2
     - name: codex-review
       routing:
         failover:
