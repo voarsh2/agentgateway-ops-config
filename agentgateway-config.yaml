@@ -406,6 +406,80 @@ llm:
           consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
+    - name: aicheap-gpt-6-luna
+      provider:
+        reference: aicheap-shared
+      params:
+        model: gpt-6-luna
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 || response.code >=
+          500 || string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 5m
+          restoreHealth: 1
+    - name: aicheap-gpt-6-sol
+      provider:
+        reference: aicheap-shared
+      params:
+        model: gpt-6-sol
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
+        instructions: >-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) &&
+          llmRequest.reasoning.effort == "medium"
+            ? [
+                {
+                  "type": "message",
+                  "role": "developer",
+                  "content": "Use adequate reasoning for the task. Avoid stopping after a shallow first pass when constraints or debugging details matter."
+                }
+              ] + llmRequest.instructions
+            : has(llmRequest.reasoning) && has(llmRequest.reasoning.effort) && llmRequest.reasoning.effort in ["high", "xhigh"]
+              ? [
+                  {
+                    "type": "message",
+                    "role": "developer",
+                    "content": "This task may require extended reasoning. Do not curtail reasoning early; continue until the reasoning is complete."
+                  }
+                ] + llmRequest.instructions
+              : llmRequest.instructions
+      health:
+        unhealthyExpression: >-
+          response.code == 249 || response.code == 402 || response.code == 429 || response.code >=
+          500 || string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 5m
+          restoreHealth: 1
     - name: clawbay-gpt-5.6-terra
       provider: openAI
       params:
@@ -540,6 +614,18 @@ llm:
               priority: 0
             - model: zai-glm-5.3-flash
               priority: 1
+    - name: gpt-6-luna
+      routing:
+        failover:
+          targets:
+            - model: aicheap-gpt-6-luna
+              priority: 0
+    - name: gpt-6-sol
+      routing:
+        failover:
+          targets:
+            - model: aicheap-gpt-6-sol
+              priority: 0
     - name: gpt-5.6-terra
       routing:
         failover:
