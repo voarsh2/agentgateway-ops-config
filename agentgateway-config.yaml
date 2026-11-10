@@ -3,8 +3,39 @@ config:
 frontendPolicies:
   http:
     maxBufferSize: 350388608
+gateways:
+  default:
+    port: 3000
+routes:
+  - name: codex-passthrough
+    gateways:
+      - default
+    matches:
+      - path:
+          pathPrefix: /codex
+    policies:
+      urlRewrite:
+        path:
+          prefix: /
+      backendAuth:
+        key:
+          value: $CODEX_OAUTH_TOKEN
+      backendTLS: {}
+      ai:
+        routes:
+          /v1/chat/completions: completions
+          /v1/responses: responses
+          '*': passthrough
+    backends:
+      - ai:
+          name: codex-agent
+          provider:
+            openAI: {}
+          hostOverride: chatgpt.com:443
+          pathPrefix: /backend-api/codex
 llm:
-  port: 3000
+  gateways:
+    - default
   policies:
     retry:
       attempts: 2
@@ -18,27 +49,40 @@ llm:
         service not available") || string(response.body).contains("temporarily unavailable") ||
         string(response.body).contains("This model is currently overloaded on OpenAI's servers.
         Please try again shortly.")
-      maxBufferSize: 350388608
   providers:
     - name: aicheap-shared
       provider: openAI
       params:
         apiKey: $AICHEAP_API_KEY
         baseUrl: https://api.aicheap.io/v1
-    - name: zai-shared
-      provider: openAI
+    # Native Responses endpoint; legacy Coding Plan keys may be Chat-only.
+    - name: zai-responses-shared
+      provider:
+        custom:
+          providerOverride: openai
+          formats:
+            - type: responses
       params:
         apiKey: $ZAI_API_KEY
         baseUrl: https://api.z.ai/api/v1
     - name: zai-chat-shared
-      provider: openAI
+      provider:
+        custom:
+          providerOverride: openai
+          formats:
+            - type: completions
       params:
         apiKey: $ZAI_API_KEY
         baseUrl: https://api.z.ai/api/coding/paas/v4
+    - name: openai-sub-shared
+      provider: openAI
+      params:
+        apiKey: $CODEX_OAUTH_TOKEN
+        baseUrl: https://chatgpt.com/backend-api/codex
   models:
     - name: zai-glm-5.3-flash
       provider:
-        reference: zai-shared
+        reference: zai-chat-shared
       params:
         model: glm-5.3-flash
       transformation:
@@ -48,7 +92,7 @@ llm:
             : {"effort": "max"}
     - name: zai-glm-5.3
       provider:
-        reference: zai-shared
+        reference: zai-chat-shared
       params:
         model: glm-5.3
       transformation:
@@ -58,9 +102,20 @@ llm:
             : {"effort": "max"}
     - name: zai-glm-5.2
       provider:
-        reference: zai-shared
+        reference: zai-chat-shared
       params:
         model: glm-5.2
+      transformation:
+        reasoning: |-
+          has(llmRequest.reasoning) && has(llmRequest.reasoning.effort)
+            ? {"effort": llmRequest.reasoning.effort == "xhigh" ? "max" : llmRequest.reasoning.effort == "medium" ? "low" : llmRequest.reasoning.effort}
+            : {"effort": "max"}
+    - name: zai-responses-glm-5.3
+      visibility: internal
+      provider:
+        reference: zai-responses-shared
+      params:
+        model: glm-5.3
       transformation:
         reasoning: |-
           has(llmRequest.reasoning) && has(llmRequest.reasoning.effort)
@@ -443,6 +498,42 @@ llm:
           consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
+    - name: openai-sub-gpt-6-luna
+      provider:
+        reference: openai-sub-shared
+      params:
+        model: gpt-6-luna
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 249 || response.code == 402 || response.code ==
+          429 || response.code >= 500 || string(response.body).contains("invalid_token") ||
+          string(response.body).contains("token expired") || string(response.body).contains("session
+          expired") || string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 5m
+          restoreHealth: 1
+    - name: openai-sub-gpt-6.1-sol
+      provider:
+        reference: openai-sub-shared
+      params:
+        model: gpt-6.1-sol
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 249 || response.code == 402 || response.code ==
+          429 || response.code >= 500 || string(response.body).contains("invalid_token") ||
+          string(response.body).contains("token expired") || string(response.body).contains("session
+          expired") || string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 5m
+          restoreHealth: 1
     - name: aicheap-gpt-6-sol
       provider:
         reference: aicheap-shared
@@ -568,6 +659,12 @@ llm:
           targets:
             - model: zai-glm-5.3
               priority: 0
+    - name: glm-5.3-responses
+      routing:
+        failover:
+          targets:
+            - model: zai-responses-glm-5.3
+              priority: 0
     - name: glm-5.2
       routing:
         failover:
@@ -580,8 +677,6 @@ llm:
           targets:
             - model: clawbay-gpt-5.4
               priority: 0
-            - model: aicheap-gpt-5.4
-              priority: 1
     - name: gpt-5.4-mini
       routing:
         failover:
@@ -610,15 +705,13 @@ llm:
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.6-luna
+            - model: openai-sub-gpt-6-luna
               priority: 0
-            - model: zai-glm-5.3-flash
-              priority: 1
     - name: gpt-6-luna
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-6-luna
+            - model: openai-sub-gpt-6-luna
               priority: 0
     - name: gpt-6-sol
       routing:
@@ -636,10 +729,8 @@ llm:
       routing:
         failover:
           targets:
-            - model: aicheap-gpt-5.6-luna
-              priority: 0
             - model: zai-chat-glm-5.3-flash
-              priority: 1
+              priority: 0
     - name: codex-review
       routing:
         failover:
