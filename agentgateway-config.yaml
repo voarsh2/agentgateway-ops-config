@@ -713,6 +713,12 @@ llm:
           targets:
             - model: openai-sub-gpt-6-luna
               priority: 0
+    - name: gpt-6.1-sol
+      routing:
+        failover:
+          targets:
+            - model: openai-sub-gpt-6.1-sol
+              priority: 0
     - name: gpt-6-sol
       routing:
         failover:
