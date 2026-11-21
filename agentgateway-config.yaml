@@ -534,6 +534,24 @@ llm:
           consecutiveFailures: 1
           duration: 5m
           restoreHealth: 1
+    - name: openai-sub-gpt-6.2-sol
+      provider:
+        reference: openai-sub-shared
+      params:
+        model: gpt-6.2-sol
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 249 || response.code == 402 || response.code ==
+          429 || response.code >= 500 || string(response.body).contains("invalid_token") ||
+          string(response.body).contains("token expired") || string(response.body).contains("session
+          expired") || string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 5m
+          restoreHealth: 1
     - name: aicheap-gpt-6-sol
       provider:
         reference: aicheap-shared
@@ -718,6 +736,12 @@ llm:
         failover:
           targets:
             - model: openai-sub-gpt-6.1-sol
+              priority: 0
+    - name: gpt-6.2-sol
+      routing:
+        failover:
+          targets:
+            - model: openai-sub-gpt-6.2-sol
               priority: 0
     - name: gpt-6-sol
       routing:
