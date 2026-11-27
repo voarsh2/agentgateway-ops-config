@@ -55,6 +55,11 @@ llm:
       params:
         apiKey: $AICHEAP_API_KEY
         baseUrl: https://api.aicheap.io/v1
+    - name: clawbay-shared
+      provider: openAI
+      params:
+        apiKey: $CLAWBAY_API_KEY
+        baseUrl: https://api.theclawbay.com/v1
     # Native Responses endpoint; legacy Coding Plan keys may be Chat-only.
     - name: zai-responses-shared
       provider:
@@ -128,11 +133,10 @@ llm:
       params:
         model: glm-5.3-flash
     - name: clawbay-gpt-5.6-sol
-      provider: openAI
+      provider:
+        reference: clawbay-shared
       params:
         model: gpt-5.6-sol
-        apiKey: $CLAWBAY_API_KEY
-        baseUrl: https://api.theclawbay.com/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -156,8 +160,11 @@ llm:
               : llmRequest.instructions
       health:
         unhealthyExpression: >-
-          response.code == 249 || response.code == 402 || response.code == 429 || response.code >=
-          500 || string(response.body).contains("model service not available") ||
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
           string(response.body).contains("temporarily unavailable") ||
           string(response.body).contains("This model is currently overloaded on OpenAI's servers.
           Please try again shortly.")
@@ -203,11 +210,10 @@ llm:
           duration: 5m
           restoreHealth: 1
     - name: clawbay-gpt-5.6-luna
-      provider: openAI
+      provider:
+        reference: clawbay-shared
       params:
         model: gpt-5.6-luna
-        apiKey: $CLAWBAY_API_KEY
-        baseUrl: https://api.theclawbay.com/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -231,8 +237,11 @@ llm:
               : llmRequest.instructions
       health:
         unhealthyExpression: >-
-          response.code == 249 || response.code == 402 || response.code == 429 || response.code >=
-          500 || string(response.body).contains("model service not available") ||
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
           string(response.body).contains("temporarily unavailable") ||
           string(response.body).contains("This model is currently overloaded on OpenAI's servers.
           Please try again shortly.")
@@ -406,11 +415,10 @@ llm:
           duration: 5m
           restoreHealth: 1
     - name: clawbay-gpt-5.6-terra
-      provider: openAI
+      provider:
+        reference: clawbay-shared
       params:
         model: gpt-5.6-terra
-        apiKey: $CLAWBAY_API_KEY
-        baseUrl: https://api.theclawbay.com/v1
       transformation:
         reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"high"}'
         instructions: >-
@@ -434,8 +442,116 @@ llm:
               : llmRequest.instructions
       health:
         unhealthyExpression: >-
-          response.code == 249 || response.code == 402 || response.code == 429 || response.code >=
-          500 || string(response.body).contains("model service not available") ||
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 1m
+          restoreHealth: 1
+    - name: clawbay-gpt-6-astra
+      provider:
+        reference: clawbay-shared
+      params:
+        model: gpt-6-astra
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"medium"}'
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 1m
+          restoreHealth: 1
+    - name: clawbay-gpt-6-luna
+      provider:
+        reference: clawbay-shared
+      params:
+        model: gpt-6-luna
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"medium"}'
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 1m
+          restoreHealth: 1
+    - name: clawbay-gpt-6-sol
+      provider:
+        reference: clawbay-shared
+      params:
+        model: gpt-6-sol
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"medium"}'
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 1m
+          restoreHealth: 1
+    - name: clawbay-gpt-6.1-sol
+      provider:
+        reference: clawbay-shared
+      params:
+        model: gpt-6.1-sol
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"low"}'
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
+          string(response.body).contains("temporarily unavailable") ||
+          string(response.body).contains("This model is currently overloaded on OpenAI's servers.
+          Please try again shortly.")
+        eviction:
+          consecutiveFailures: 1
+          duration: 1m
+          restoreHealth: 1
+    - name: clawbay-gpt-6.1-terra
+      provider:
+        reference: clawbay-shared
+      params:
+        model: gpt-6.1-terra
+      transformation:
+        reasoning: 'has(llmRequest.reasoning) ? llmRequest.reasoning : {"effort":"low"}'
+      health:
+        unhealthyExpression: >-
+          response.code == 401 || response.code == 404 || response.code == 249 ||
+          response.code == 402 || response.code == 429 || response.code >= 500 ||
+          string(response.body).contains("invalid_api_key") ||
+          string(response.body).contains("model_not_found") ||
+          string(response.body).contains("model service not available") ||
           string(response.body).contains("temporarily unavailable") ||
           string(response.body).contains("This model is currently overloaded on OpenAI's servers.
           Please try again shortly.")
@@ -519,20 +635,28 @@ llm:
       routing:
         failover:
           targets:
-            - model: openai-sub-gpt-6-luna
+            - model: clawbay-gpt-5.6-luna
               priority: 0
+            - model: aicheap-gpt-5.6-luna
+              priority: 1
     - name: gpt-6-luna
       routing:
         failover:
           targets:
             - model: openai-sub-gpt-6-luna
               priority: 0
+            - model: clawbay-gpt-6-luna
+              priority: 1
+            - model: aicheap-gpt-6-luna
+              priority: 2
     - name: gpt-6.1-sol
       routing:
         failover:
           targets:
             - model: openai-sub-gpt-6.1-sol
               priority: 0
+            - model: clawbay-gpt-6.1-sol
+              priority: 1
     - name: gpt-6.2-sol
       routing:
         failover:
@@ -545,12 +669,28 @@ llm:
           targets:
             - model: aicheap-gpt-6-sol
               priority: 0
+            - model: clawbay-gpt-6-sol
+              priority: 1
+    - name: gpt-6-astra
+      routing:
+        failover:
+          targets:
+            - model: clawbay-gpt-6-astra
+              priority: 0
+    - name: gpt-6.1-terra
+      routing:
+        failover:
+          targets:
+            - model: clawbay-gpt-6.1-terra
+              priority: 0
     - name: gpt-5.6-terra
       routing:
         failover:
           targets:
             - model: aicheap-gpt-5.6-terra
               priority: 0
+            - model: clawbay-gpt-5.6-terra
+              priority: 1
     - name: hindsight-facts
       routing:
         failover:
